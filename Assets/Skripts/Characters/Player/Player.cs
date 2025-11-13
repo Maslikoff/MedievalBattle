@@ -4,12 +4,14 @@ using UnityEngine;
 [RequireComponent(typeof(InputHandler))]
 [RequireComponent(typeof(PlayerMover))]
 [RequireComponent(typeof(PlayerAttacker))]
+[RequireComponent(typeof(PlayerAnimation))]
 [RequireComponent(typeof(Health))]
 public class Player : MonoBehaviour
 {
     private InputHandler _inputHandler;
     private PlayerMover _mover;
     private PlayerAttacker _attacker;
+    private PlayerAnimation _anim;
     private Health _health;
 
     private bool _isAlive = true;
@@ -18,9 +20,9 @@ public class Player : MonoBehaviour
     public int CurrentHealth => _health != null ? _health.CurrentHealth : 0;
     public WeaponType CurrentWeapon => _attacker != null ? _attacker.CurrentWeapon : WeaponType.Firearm;
 
-    public event Action OnPlayerDeath;
-    public event Action<int> OnHealthChanged;
-    public event Action<WeaponType> OnWeaponSwitched;
+    public event Action PlayerDeath;
+    public event Action<int> HealthChanged;
+    public event Action<WeaponType> WeaponSwitched;
 
     private void Awake()
     {
@@ -28,6 +30,7 @@ public class Player : MonoBehaviour
         _mover = GetComponent<PlayerMover>();
         _attacker = GetComponent<PlayerAttacker>();
         _health = GetComponent<Health>();
+        _anim = GetComponent<PlayerAnimation>();
     }
 
     private void Start()
@@ -54,18 +57,20 @@ public class Player : MonoBehaviour
             return;
 
         _isAlive = false;
-       
-        OnPlayerDeath?.Invoke();
+
+        _anim.PlayDeathAnimation();
+
+        PlayerDeath?.Invoke();
     }
 
     private void OnHandleHealthChanged(int currentHealth)
     {
-        OnHealthChanged?.Invoke(currentHealth);
+        HealthChanged?.Invoke(currentHealth);
     }
 
     private void OnHandleWeaponSwitched(WeaponType type)
     {
-        OnWeaponSwitched?.Invoke(type);
+        WeaponSwitched?.Invoke(type);
     }
 
     private void OnDestroy()

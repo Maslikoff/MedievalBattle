@@ -1,10 +1,10 @@
 using System;
 using UnityEngine;
 
-public enum WeaponType 
-{ 
-    Firearm, 
-    Melee 
+public enum WeaponType
+{
+    Firearm,
+    Melee
 }
 
 public class PlayerAttacker : Attacker
@@ -13,11 +13,15 @@ public class PlayerAttacker : Attacker
     private const float MaxDistance = 1000f;
     private const float Balance = 100f;
     private const float MiddleScreen = 2f;
+    private const float AnimationDelay = 1f;
 
     [Header("Attack Settings")]
     [SerializeField] private Transform _firePoint;
     [SerializeField] private float _bulletSpeed = 20f;
     [SerializeField] private LayerMask _enemyLayerMask;
+
+    [Header("Ammo Settings")]
+    [SerializeField] private int _maxAmmo = 60;
 
     [Header("Weapon Models")]
     [SerializeField] private Weapon _firearmModel;
@@ -26,28 +30,40 @@ public class PlayerAttacker : Attacker
     [Header("Dependencies")]
     [SerializeField] private BulletPool _bulletPool;
 
-    public event Action<WeaponType> OnWeaponSwitched;
-
     private Player _player;
+    private PlayerAnimation _playerAnimation;
     private Camera _playerCamera;
     private WeaponType _currentWeapon = WeaponType.Firearm;
 
+    private int _currentAmmo;
+    private bool _isAttacking;
+
+    public event Action<WeaponType> OnWeaponSwitched;
+    public event Action<int> OnAmmoChanged;
+
     public WeaponType CurrentWeapon => _currentWeapon;
+    public int CurrentAmmo => _currentAmmo;
+    public int MaxAmmo => _maxAmmo;
 
     private void Start()
     {
         _player = GetComponent<Player>();
+        _playerAnimation = GetComponent<PlayerAnimation>();
         _playerCamera = Camera.main;
+
+        _currentAmmo = _maxAmmo;
 
         UpdateWeaponVisuals();
     }
 
     public override void Attack()
     {
-        if (CanAttack() == false || CanPerformActions() == false)
+        if (CanAttack() == false || CanPerformActions() == false || _isAttacking)
             return;
 
-        switch(_currentWeapon)
+        _isAttacking = true;
+
+        switch (_currentWeapon)
         {
             case WeaponType.Firearm:
                 PerformFirearmAttack();
@@ -59,6 +75,7 @@ public class PlayerAttacker : Attacker
         }
 
         _lastAttackTime = Time.time;
+        _isAttacking = false;
     }
 
     public void OnWeaponSwitch()
@@ -67,14 +84,31 @@ public class PlayerAttacker : Attacker
         UpdateWeaponVisuals();
     }
 
+    public void AddAmmo(int amount)
+    {
+        _currentAmmo = Mathf.Clamp(_currentAmmo + amount, 0, _maxAmmo);
+        OnAmmoChanged?.Invoke(_currentAmmo);
+    }
+
     public override bool CanAttack() => _canAttack && IsCooldownReady();
 
     private bool CanPerformActions() => _player != null && _player.IsAlive;
 
     private void PerformFirearmAttack()
     {
-        if(_bulletPool == null || _firePoint == null)
+        if (_bulletPool == null || _firePoint == null)
             return;
+
+        if (_currentAmmo <= 0)
+        {
+            _isAttacking = false;
+            return;
+        }
+
+        _currentAmmo--;
+        OnAmmoChanged?.Invoke(_currentAmmo);
+
+        _playerAnimation.PlayShootAnimation();
 
         Vector3 targetPoint = GetCenterScreenPoint();
         Vector3 shootDirection = (targetPoint - GetShootPosition()).normalized;
@@ -91,15 +125,23 @@ public class PlayerAttacker : Attacker
 
     private void PerformMeleeAttack()
     {
-        if(_playerCamera == null)
-            return;
+        _playerAnimation.PlayMeleeAttackAnimation();
 
-        RaycastHit hit;
-        Vector3 rayOrigin = _playerCamera.transform.position;
-        Vector3 rayDirection = _playerCamera.transform.forward;
+        Invoke(nameof(ApplyMeleeDamage), AnimationDelay);
+    }
 
-        if(Physics.Raycast(rayOrigin, rayDirection, out hit, _attackRange, _enemyLayerMask))
-            ApplyDamageToTarget(hit.collider.transform);
+    private void ApplyMeleeDamage()
+    {
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, _attackRange, _enemyLayerMask);
+
+        foreach (Collider collider in hitColliders)
+        {
+            Vector3 directionToEnemy = (collider.transform.position - transform.position).normalized;
+            float dotProduct = Vector3.Dot(transform.forward, directionToEnemy);
+
+            if (dotProduct > 0)
+                ApplyDamageToTarget(collider.transform);
+        }
     }
 
     private void UpdateWeaponVisuals()

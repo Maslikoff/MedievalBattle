@@ -1,0 +1,146 @@
+# Apple ModelI/O MTL File: Frog.mtl
+
+newmtl Сфера
+	map_Kd Сфера-color.png
+	Kd 1 1 1
+	Ka 0 0 0
+	Ks 0
+	ao 0
+	subsurface 0
+	map_metallic Сфера-metallic.png
+	specularTint 0
+	map_roughness Сфера-roughness.png
+	anisotropicRotation 0
+	sheen 0.05
+	sheenTint 0
+	clearCoat 0
+	clearCoatGloss 0
+
+newmtl Сфера_1
+	map_Kd Сфера_1-color.png
+	Kd 1 1 1
+	Ka 0 0 0
+	Ks 0
+	ao 0
+	subsurface 0
+	map_metallic Сфера_1-metallic.png
+	specularTint 0
+	map_roughness Сфера_1-roughness.png
+	anisotropicRotation 0
+	sheen 0.05
+	sheenTint 0
+	clearCoat 0
+	clearCoatGloss 0
+
+newmtl Сфера_2
+	map_Kd Сфера_2-color.png
+	Kd 1 1 1
+	Ka 0 0 0
+	Ks 0
+	ao 0
+	subsurface 0
+	map_metallic Сфера_2-metallic.png
+	specularTint 0
+	map_roughness Сфера_2-roughness.png
+	anisotropicRotation 0
+	sheen 0.05
+	sheenTint 0
+	clearCoat 0
+	clearCoatGloss 0
+
+newmtl Сфера_3
+	map_Kd Сфера_3-color.png
+	Kd 1 1 1
+	Ka 0 0 0
+	Ks 0
+	ao 0
+	subsurface 0
+	map_metallic Сфера_3-metallic.png
+	specularTint 0
+	map_roughness Сфера_3-roughness.png
+	anisotropicRotation 0
+	sheen 0.05
+	sheenTint 0
+	clearCoat 0
+	clearCoatGloss 0
+
+newmtl Сфера_4
+	map_Kd Сфера_4-color.png
+	Kd 1 1 1
+	Ka 0 0 0
+	Ks 0
+	ao 0
+	subsurface 0
+	map_metallic Сфера_4-metallic.png
+	specularTint 0
+	map_roughness Сфера_4-roughness.png
+	anisotropicRotation 0
+	sheen 0.05
+	sheenTint 0
+	clearCoat 0
+	clearCoatGloss 0
+
+newmtl Сфера_5
+	map_Kd Сфера_5-color.png
+	Kd 1 1 1
+	Ka 0 0 0
+	Ks 0
+	ao 0
+	subsurface 0
+	map_metallic Сфера_5-metallic.png
+	specularTint 0
+	map_roughness Сфера_5-roughness.png
+	anisotropicRotation 0
+	sheen 0.05
+	sheenTint 0
+	clearCoat 0
+	clearCoatGloss 0
+
+newmtl Сфера_6
+	map_Kd Сфера_6-color.png
+	Kd 1 1 1
+	Ka 0 0 0
+	Ks 0
+	ao 0
+	subsurface 0
+	map_metallic Сфера_6-metallic.png
+	specularTint 0
+	map_roughness Сфера_6-roughness.png
+	anisotropicRotation 0
+	sheen 0.05
+	sheenTint 0
+	clearCoat 0
+	clearCoatGloss 0
+
+newmtl Сфера_7
+	map_Kd Сфера_7-color.png
+	Kd 1 1 1
+	Ka 0 0 0
+	Ks 0
+	ao 0
+	subsurface 0
+	map_metallic Сфера_7-metallic.png
+	specularTint 0
+	map_roughness Сфера_7-roughness.png
+	anisotropicRotation 0
+	sheen 0.05
+	sheenTint 0
+	clearCoat 0
+	clearCoatGloss 0
+
+newmtl Сфера_8
+	map_Kd Сфера_8-color.png
+	Kd 1 1 1
+	Ka 0 0 0
+	Ks 0
+	ao 0
+	subsurface 0
+	map_metallic Сфера_8-metallic.png
+	specularTint 0
+	map_roughness Сфера_8-roughness.png
+	anisotropicRotation 0
+	sheen 0.05
+	sheenTint 0
+	clearCoat 0
+	clearCoatGloss 0
+

@@ -18,7 +18,7 @@ public class PoolableObject : MonoBehaviour
         }
         else
         {
-            Destroy(gameObject);
+            gameObject.SetActive(false);
         }
     }
 }

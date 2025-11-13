@@ -8,6 +8,7 @@ public class Health : MonoBehaviour
 
     private int _currentHealth;
 
+    public int MaxHealth => _maxHealth;
     public int CurrentHealth => _currentHealth;
 
     public event Action Death;

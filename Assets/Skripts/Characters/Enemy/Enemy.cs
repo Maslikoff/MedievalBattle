@@ -1,9 +1,11 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(EnemyMover))]
 [RequireComponent(typeof(EnemyAttacker))]
+[RequireComponent(typeof(EnemyAnimator))]
 [RequireComponent(typeof(Health))]
 public abstract class Enemy : MonoBehaviour
 {
@@ -17,6 +19,7 @@ public abstract class Enemy : MonoBehaviour
     protected NavMeshAgent _navMeshAgent;
     protected Renderer _enemyRenderer;
     protected Transform _playerTarget;
+    protected EnemyAnimator _enemyAnimator;
 
     protected int _maxHealth = 100;
     protected bool _isAlive = true;
@@ -36,6 +39,7 @@ public abstract class Enemy : MonoBehaviour
         _health = GetComponent<Health>();
         _navMeshAgent = GetComponent<NavMeshAgent>();
         _enemyRenderer = GetComponentInChildren<Renderer>();
+        _enemyAnimator = GetComponent<EnemyAnimator>();
     }
 
     protected virtual void Start()
@@ -60,6 +64,8 @@ public abstract class Enemy : MonoBehaviour
             return;
 
         _isAlive = false;
+
+        _enemyAnimator.PlayDeathAnimation();
 
         if (_mover != null)
         {
@@ -86,7 +92,7 @@ public abstract class Enemy : MonoBehaviour
         StartCoroutine(DamageFlash());
     }
 
-    protected virtual System.Collections.IEnumerator DamageFlash()
+    protected virtual IEnumerator DamageFlash()
     {
         if (_enemyRenderer == null)
             yield break;
@@ -104,6 +110,8 @@ public abstract class Enemy : MonoBehaviour
     {
         _playerTarget = playerTarget;
         _isAlive = true;
+
+        _enemyAnimator.ResetAnimator();
 
         if (_mover != null)
         {
@@ -127,13 +135,13 @@ public abstract class Enemy : MonoBehaviour
             _health.SetMaxHealth(_maxHealth);
             _health.Heal(_maxHealth);
         }
-
-        Debug.Log($"{GetType().Name} initialized");
     }
 
     public virtual void ResetEnemy()
     {
         _isAlive = true;
+
+        _enemyAnimator.ResetAnimator();
 
         if (_health != null)
         {
@@ -158,6 +166,12 @@ public abstract class Enemy : MonoBehaviour
 
         if (_attacker != null)
             _attacker.SetCanAttack(true);
+    }
+
+    public void PlayAttackAnimation()
+    {
+        if (_isAlive)
+            _enemyAnimator.PlayAttackAnimation();
     }
 
     public float GetHealthPercentage() => _health != null ? (float)_health.CurrentHealth / _maxHealth : 0f;

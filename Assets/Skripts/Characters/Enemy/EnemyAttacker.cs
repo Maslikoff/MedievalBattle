@@ -29,6 +29,8 @@ public class EnemyAttacker : Attacker
 
         PerformMeleeAttack();
         _lastAttackTime = Time.time;
+
+        _enemy?.PlayAttackAnimation();
     }
 
     public override void IncreaseDamage(float multiplier)
@@ -51,7 +53,8 @@ public class EnemyAttacker : Attacker
 
     private bool CanSeePlayer()
     {
-        if (_playerTarget == null) return false;
+        if (_playerTarget == null) 
+            return false;
 
         RaycastHit hit;
         Vector3 directionToPlayer = (_playerTarget.position - transform.position).normalized;

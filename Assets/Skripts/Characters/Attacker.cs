@@ -13,20 +13,20 @@ public abstract class Attacker : MonoBehaviour
     public abstract void Attack();
     public abstract bool CanAttack();
 
-    protected bool IsCooldownReady()
-    {
-        return Time.time >= _lastAttackTime + _attackCooldown;
-    }
+    protected bool IsCooldownReady() => Time.time >= _lastAttackTime + _attackCooldown;
 
     protected bool IsTargetInRange(Transform target)
     {
-        if (target == null) return false;
+        if (target == null)
+            return false;
+
         return Vector3.Distance(transform.position, target.position) <= _attackRange;
     }
 
     protected void ApplyDamageToTarget(Transform target)
     {
         Health targetHealth = target.GetComponent<Health>();
+
         if (targetHealth != null)
         {
             targetHealth.TakeDamage(_damage);
@@ -41,8 +41,9 @@ public abstract class Attacker : MonoBehaviour
         _canAttack = state;
     }
 
-    public virtual void IncreaseDamage(float multiplier)
+    public virtual void IncreaseDamage(float multiplier) 
     {
+        _damage = Mathf.RoundToInt(_damage * multiplier);
     }
 
     public float GetCooldownProgress()

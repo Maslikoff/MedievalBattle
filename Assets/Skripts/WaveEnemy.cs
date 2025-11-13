@@ -171,10 +171,11 @@ public class WaveEnemy : MonoBehaviour
 
     private void SpawnEnemyWithSmoke(bool isBoss)
     {
-        if (_spawnPoints.Length == 0) return;
+        if (_spawnPoints.Length == 0) 
+            return;
 
         Transform spawnPoint = _spawnPoints[Random.Range(0, _spawnPoints.Length)];
-
+       
         if (_smokeEffect != null)
         {
             _smokeEffect.transform.position = spawnPoint.position;
