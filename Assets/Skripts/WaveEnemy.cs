@@ -17,6 +17,9 @@ public class WaveEnemy : MonoBehaviour
     [SerializeField] private EnemySpawner _enemySpawner;
     [SerializeField] private ParticleSystem _smokeEffect;
 
+    [Header("UI")]
+    [SerializeField] private WaveView _view;
+
     private int _currentWave = 0;
     private int _enemiesRemaining = 0;
     private List<Enemy> _currentEnemies = new List<Enemy>();
@@ -29,9 +32,9 @@ public class WaveEnemy : MonoBehaviour
     public int TotalWaves => _totalWaves;
     public bool IsWaveInProgress => _waveInProgress;
 
-    public event Action<int> OnWaveStarted;
-    public event Action<int> OnWaveCompleted;
-    public event Action OnAllWavesCompleted;
+    public event Action<int> WaveStarted;
+    public event Action<int> WaveCompleted;
+    public event Action AllWavesCompleted;
 
     private void Start()
     {
@@ -50,7 +53,7 @@ public class WaveEnemy : MonoBehaviour
         _currentWave++;
         _waveInProgress = true;
 
-        OnWaveStarted?.Invoke(_currentWave);
+        WaveStarted?.Invoke(_currentWave);
 
         if (_waveCoroutine != null)
             StopCoroutine(_waveCoroutine);
@@ -156,9 +159,11 @@ public class WaveEnemy : MonoBehaviour
         SpawnEnemyWithSmoke(true);
         _enemiesRemaining++;
 
+        _view?.OnBossSpawned();
+
         yield return new WaitUntil(() => _enemiesRemaining <= 0);
 
-        WaveCompleted();
+        OnWaveCompleted();
     }
 
     private int GetEnemiesForWave(int waveNumber)
@@ -205,19 +210,19 @@ public class WaveEnemy : MonoBehaviour
         StartNextWave();
     }
 
-    private void WaveCompleted()
+    private void OnWaveCompleted()
     {
         _waveInProgress = false;
-        OnWaveCompleted?.Invoke(_currentWave);
+        WaveCompleted?.Invoke(_currentWave);
 
         if (_currentWave < _totalWaves)
             StartCoroutine(StartNextWaveAfterDelay());
     }
 
-    private void AllWavesCompleted()
+    private void OnAllWavesCompleted()
     {
         _waveInProgress = false;
-        OnAllWavesCompleted?.Invoke();
+        AllWavesCompleted?.Invoke();
 
         Victory();
     }

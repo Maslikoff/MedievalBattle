@@ -21,7 +21,7 @@ public class PlayerAttacker : Attacker
     [SerializeField] private LayerMask _enemyLayerMask;
 
     [Header("Ammo Settings")]
-    [SerializeField] private int _maxAmmo = 60;
+    [SerializeField] private int _maxAmmo = 120;
 
     [Header("Weapon Models")]
     [SerializeField] private Weapon _firearmModel;

@@ -3902,6 +3902,7 @@ GameObject:
   - component: {fileID: 2304763267014853472}
   - component: {fileID: 1582367961478611686}
   - component: {fileID: 660083117893473631}
+  - component: {fileID: 6697195021167044926}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -4042,7 +4043,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c7293570083d714eb679be550a40ed5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _moveSpeed: 5
+  _moveSpeed: 4
   _mouseSensitivity: 2
 --- !u!114 &2304763267014853472
 MonoBehaviour:
@@ -4060,13 +4061,14 @@ MonoBehaviour:
   _attackRange: 2
   _attackCooldown: 1
   _firePoint: {fileID: 875624350646772057}
-  _bulletPrefab: {fileID: -5549494171425459076, guid: 9d96df4809f0feb4ea0dc6adffa987c6, type: 3}
-  _bulletSpeed: 50
+  _bulletSpeed: 20
   _enemyLayerMask:
     serializedVersion: 2
     m_Bits: 128
+  _maxAmmo: 120
   _firearmModel: {fileID: 8277476500462557001}
   _meleeWeaponModel: {fileID: 2575400063922959947}
+  _bulletPool: {fileID: 0}
 --- !u!114 &1582367961478611686
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4093,6 +4095,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 793934bbc04288549b2af689a1843539, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &6697195021167044926
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7424489639582350502}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ecd9c313242c4f944a9d8c3650bd9f16, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _moveSpeedParam: MoveSpeed
+  _isShootingParam: IsShooting
+  _isMeleeAttackingParam: IsMeleeAttacking
+  _isDeadParam: IsDead
+  _weaponTypeParam: WeaponType
+  _animator: {fileID: 8936222646330293900}
+  _inputHandler: {fileID: 8815536515647847704}
 --- !u!1 &7566520753132725694
 GameObject:
   m_ObjectHideFlags: 0

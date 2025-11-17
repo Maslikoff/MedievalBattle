@@ -29,7 +29,6 @@ public class EnemyBoss : Enemy
     protected override void OnHandleDeath()
     {
         base.OnHandleDeath();
-        Debug.Log("BOSS DEFEATED!");
     }
 
     public override void Initialize(Transform playerTarget)
