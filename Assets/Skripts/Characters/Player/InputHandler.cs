@@ -8,12 +8,14 @@ public class InputHandler : MonoBehaviour
 
     public event Action PrimaryAttack;
     public event Action WeaponSwitch;
+    public event Action EscapePressed;
 
     private void Update()
     {
         HandleMovementInput();
         HandleMpuseInput();
         HandleCombatInput();
+        HandleEscapeInput();
     }
 
     private void HandleMovementInput()
@@ -37,5 +39,11 @@ public class InputHandler : MonoBehaviour
 
         if(Input.GetKeyDown(KeyCode.Q))
             WeaponSwitch?.Invoke();
+    }
+
+    private void HandleEscapeInput()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+            EscapePressed?.Invoke();
     }
 }

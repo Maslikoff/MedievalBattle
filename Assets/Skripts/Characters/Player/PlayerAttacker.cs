@@ -22,6 +22,7 @@ public class PlayerAttacker : Attacker
 
     [Header("Ammo Settings")]
     [SerializeField] private int _maxAmmo = 120;
+    [SerializeField] private int _currentAmmo;
 
     [Header("Weapon Models")]
     [SerializeField] private Weapon _firearmModel;
@@ -32,10 +33,10 @@ public class PlayerAttacker : Attacker
 
     private Player _player;
     private PlayerAnimation _playerAnimation;
+    private PlayerSound _playerSound;
     private Camera _playerCamera;
     private WeaponType _currentWeapon = WeaponType.Firearm;
 
-    private int _currentAmmo;
     private bool _isAttacking;
 
     public event Action<WeaponType> OnWeaponSwitched;
@@ -49,9 +50,8 @@ public class PlayerAttacker : Attacker
     {
         _player = GetComponent<Player>();
         _playerAnimation = GetComponent<PlayerAnimation>();
+        _playerSound = GetComponent<PlayerSound>();
         _playerCamera = Camera.main;
-
-        _currentAmmo = _maxAmmo;
 
         UpdateWeaponVisuals();
     }
@@ -101,6 +101,7 @@ public class PlayerAttacker : Attacker
 
         if (_currentAmmo <= 0)
         {
+            _playerSound?.PlayEmptySound();
             _isAttacking = false;
             return;
         }
@@ -109,6 +110,8 @@ public class PlayerAttacker : Attacker
         OnAmmoChanged?.Invoke(_currentAmmo);
 
         _playerAnimation.PlayShootAnimation();
+
+        _playerSound?.PlayShootSound();
 
         Vector3 targetPoint = GetCenterScreenPoint();
         Vector3 shootDirection = (targetPoint - GetShootPosition()).normalized;
@@ -126,7 +129,7 @@ public class PlayerAttacker : Attacker
     private void PerformMeleeAttack()
     {
         _playerAnimation.PlayMeleeAttackAnimation();
-
+        _playerSound?.PlayMeleeSound();
         Invoke(nameof(ApplyMeleeDamage), AnimationDelay);
     }
 

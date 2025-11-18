@@ -5,6 +5,7 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerMover))]
 [RequireComponent(typeof(PlayerAttacker))]
 [RequireComponent(typeof(PlayerAnimation))]
+[RequireComponent(typeof(PlayerSound))]
 [RequireComponent(typeof(Health))]
 public class Player : MonoBehaviour
 {
@@ -12,6 +13,7 @@ public class Player : MonoBehaviour
     private PlayerMover _mover;
     private PlayerAttacker _attacker;
     private PlayerAnimation _anim;
+    private PlayerSound _sound;
     private Health _health;
 
     private bool _isAlive = true;
@@ -29,8 +31,9 @@ public class Player : MonoBehaviour
         _inputHandler = GetComponent<InputHandler>();
         _mover = GetComponent<PlayerMover>();
         _attacker = GetComponent<PlayerAttacker>();
-        _health = GetComponent<Health>();
         _anim = GetComponent<PlayerAnimation>();
+        _sound = GetComponent<PlayerSound>();
+        _health = GetComponent<Health>();
     }
 
     private void Start()

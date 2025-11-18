@@ -7,12 +7,14 @@ public class Game : MonoBehaviour
 {
     [Header("Player Reference")]
     [SerializeField] private Health _playerHealth;
+    [SerializeField] private InputHandler _inputHandler;
 
     [Header("Wave Manager")]
     [SerializeField] private WaveEnemy _waveManager;
 
     [Header("UI Panels")]
     [SerializeField] private GameObject _gamePanel;
+    [SerializeField] private GameObject _pausePanel;
     [SerializeField] private GameObject _victoryPanel;
     [SerializeField] private GameObject _defeatPanel;
 
@@ -26,6 +28,7 @@ public class Game : MonoBehaviour
     [SerializeField] private string _defeatFormat = "You survived {0} waves";
 
     private bool _gameEnded = false;
+    private bool _isPaused = false;
 
     private void Start()
     {
@@ -57,6 +60,7 @@ public class Game : MonoBehaviour
     {
         _playerHealth.Death += OnPlayerDeath;
         _waveManager.AllWavesCompleted += OnAllWavesCompleted;
+        _inputHandler.EscapePressed += OnEscapePressed;
     }
 
     private void SetupButtons()
@@ -82,6 +86,34 @@ public class Game : MonoBehaviour
 
         _gameEnded = true;
         ShowVictoryPanel();
+    }
+
+    private void OnEscapePressed()
+    {
+        if (_gameEnded == false)
+            TogglePause();
+    }
+
+    private void TogglePause()
+    {
+        _isPaused = !_isPaused;
+
+        if (_isPaused)
+        {
+            SetPanelState(_gamePanel, false);
+            SetPanelState(_pausePanel, true);
+
+            Time.timeScale = 0f;
+            Cursor.lockState = CursorLockMode.None;
+        }
+        else
+        {
+            SetPanelState(_pausePanel, false);
+            SetPanelState(_gamePanel, true);
+
+            Time.timeScale = 1f;
+            Cursor.lockState = CursorLockMode.Locked;
+        }
     }
 
     private void ShowVictoryPanel()

@@ -6,20 +6,21 @@ using UnityEngine.AI;
 [RequireComponent(typeof(EnemyMover))]
 [RequireComponent(typeof(EnemyAttacker))]
 [RequireComponent(typeof(EnemyAnimator))]
+[RequireComponent(typeof(EnemySound))]
 [RequireComponent(typeof(Health))]
 public abstract class Enemy : MonoBehaviour
 {
     [Header("Base Enemy Settings")]
     [SerializeField] protected int _scoreValue = 100;
-    [SerializeField] protected GameObject _deathEffect;
 
     protected EnemyMover _mover;
     protected EnemyAttacker _attacker;
+    protected EnemyAnimator _enemyAnimator;
+    protected EnemySound _sound;
     protected Health _health;
     protected NavMeshAgent _navMeshAgent;
     protected Renderer _enemyRenderer;
     protected Transform _playerTarget;
-    protected EnemyAnimator _enemyAnimator;
 
     protected int _maxHealth = 100;
     protected bool _isAlive = true;
@@ -65,6 +66,7 @@ public abstract class Enemy : MonoBehaviour
 
         _isAlive = false;
 
+        _sound?.PlayDeathSound();
         _enemyAnimator.PlayDeathAnimation();
 
         if (_mover != null)
@@ -78,9 +80,6 @@ public abstract class Enemy : MonoBehaviour
 
         if (_navMeshAgent != null)
             _navMeshAgent.isStopped = true;
-
-        if (_deathEffect != null)
-            Instantiate(_deathEffect, transform.position, Quaternion.identity);
 
         EnemyDeath?.Invoke(this);
     }

@@ -7,10 +7,12 @@ public class EnemyAttacker : Attacker
 
     private Transform _playerTarget;
     private Enemy _enemy;
+    private EnemySound _sound;
 
     private void Start()
     {
         _enemy = GetComponent<Enemy>();
+        _sound = GetComponent<EnemySound>();
     }
 
     private void Update()
@@ -44,6 +46,8 @@ public class EnemyAttacker : Attacker
     {
         if (_playerTarget == null)
             return;
+
+        _sound.PlayMeleeSound();
 
         if (IsTargetInRange(_playerTarget) && CanSeePlayer())
             ApplyDamageToTarget(_playerTarget);
