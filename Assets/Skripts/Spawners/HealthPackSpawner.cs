@@ -13,6 +13,8 @@ public class HealthPackSpawner : MonoBehaviour
 
     private void Start()
     {
+        _healthPackPool.HealthPackTaken += OnHealthPackTaken;
+
         StartSpawning();
     }
 
@@ -47,26 +49,44 @@ public class HealthPackSpawner : MonoBehaviour
     {
         WaitForSeconds waitForSeconds = new WaitForSeconds(_spawnInterval);
 
-        while (enabled)
+        while (_currentHealthPacks < _maxHealthPacks)
         {
-            yield return waitForSeconds;
+            SpawnHealthPack();
 
-            if (_currentHealthPacks < _maxHealthPacks)
-                SpawnHealthPack();
+            yield return waitForSeconds;
         }
     }
 
     private void SpawnHealthPack()
     {
+        if (_currentHealthPacks >= _maxHealthPacks) 
+            return;
+
         Vector3 spawnPosition = GetRandomSpawnPosition();
         _healthPackPool.SpawnHealthPack(spawnPosition);
         _currentHealthPacks++;
     }
+
+    private void OnHealthPackTaken()
+    {
+        _currentHealthPacks--;
+        _currentHealthPacks = Mathf.Max(0, _currentHealthPacks);
+
+        if (_spawnCoroutine == null)
+            StartSpawning();
+    }
+
 
     private Vector3 GetRandomSpawnPosition()
     {
         Vector3 randomPoint = new Vector3(Random.Range(-_spawnArea.x, _spawnArea.x), 0f, Random.Range(-_spawnArea.z, _spawnArea.z));
 
         return transform.position + randomPoint;
+    }
+
+    private void OnDestroy()
+    {
+        if (_healthPackPool != null)
+            _healthPackPool.HealthPackTaken -= OnHealthPackTaken;
     }
 }

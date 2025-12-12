@@ -21,6 +21,7 @@ public abstract class Enemy : MonoBehaviour
     protected NavMeshAgent _navMeshAgent;
     protected Renderer _enemyRenderer;
     protected Transform _playerTarget;
+    protected Color _originalColor;
 
     protected int _maxHealth = 100;
     protected bool _isAlive = true;
@@ -30,7 +31,7 @@ public abstract class Enemy : MonoBehaviour
 
     public abstract bool IsBoss { get; }
     public bool IsAlive => _isAlive;
-    public int CurrentHealth => _health != null ? _health.CurrentHealth : 0;
+    public int CurrentHealth => _health != null ? _health.CurrentCount : 0;
     public int ScoreValue => _scoreValue;
 
     protected virtual void Awake()
@@ -41,6 +42,8 @@ public abstract class Enemy : MonoBehaviour
         _navMeshAgent = GetComponent<NavMeshAgent>();
         _enemyRenderer = GetComponentInChildren<Renderer>();
         _enemyAnimator = GetComponent<EnemyAnimator>();
+
+        _originalColor = _enemyRenderer.material.color;
     }
 
     protected virtual void Start()
@@ -54,7 +57,7 @@ public abstract class Enemy : MonoBehaviour
         if (_health != null)
         {
             _health.Death += OnHandleDeath;
-            _health.HealthChanged += OnHandleHealthChanged;
+            _health.Changed += OnHandleHealthChanged;
             _health.DamageTaken += OnHandleDamageTaken;
         }
     }
@@ -84,7 +87,7 @@ public abstract class Enemy : MonoBehaviour
         EnemyDeath?.Invoke(this);
     }
 
-    protected virtual void OnHandleHealthChanged(int currentHealth) {}
+    protected virtual void OnHandleHealthChanged(int currentHealth) { }
 
     protected virtual void OnHandleDamageTaken(int damage)
     {
@@ -96,13 +99,22 @@ public abstract class Enemy : MonoBehaviour
         if (_enemyRenderer == null)
             yield break;
 
-        Color originalColor = _enemyRenderer.material.color;
         _enemyRenderer.material.color = Color.red;
 
         yield return new WaitForSeconds(0.1f);
 
         if (_enemyRenderer != null)
-            _enemyRenderer.material.color = originalColor;
+            _enemyRenderer.material.color = _originalColor;
+    }
+
+    protected virtual void ResetEnemyState()
+    {
+        _enemyAnimator?.ResetAnimator();
+
+        if (_enemyRenderer != null)
+            _enemyRenderer.material.color = _originalColor;
+
+        StopAllCoroutines();
     }
 
     public virtual void Initialize(Transform playerTarget)
@@ -110,7 +122,7 @@ public abstract class Enemy : MonoBehaviour
         _playerTarget = playerTarget;
         _isAlive = true;
 
-        _enemyAnimator.ResetAnimator();
+        ResetEnemyState();
 
         if (_mover != null)
         {
@@ -140,7 +152,7 @@ public abstract class Enemy : MonoBehaviour
     {
         _isAlive = true;
 
-        _enemyAnimator.ResetAnimator();
+        ResetEnemyState();
 
         if (_health != null)
         {
@@ -173,14 +185,14 @@ public abstract class Enemy : MonoBehaviour
             _enemyAnimator.PlayAttackAnimation();
     }
 
-    public float GetHealthPercentage() => _health != null ? (float)_health.CurrentHealth / _maxHealth : 0f;
+    public float GetHealthPercentage() => _health != null ? (float)_health.CurrentCount / _maxHealth : 0f;
 
     protected virtual void OnDestroy()
     {
         if (_health != null)
         {
             _health.Death -= OnHandleDeath;
-            _health.HealthChanged -= OnHandleHealthChanged;
+            _health.Changed -= OnHandleHealthChanged;
             _health.DamageTaken -= OnHandleDamageTaken;
         }
     }

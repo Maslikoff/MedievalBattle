@@ -9,8 +9,8 @@ public class PlayerMover : Mover
         base.Awake();
         _player = GetComponent<Player>();
 
-        _rigidbody.freezeRotation = true;
-        _rigidbody.collisionDetectionMode = CollisionDetectionMode.Continuous;
+        Rigidbody.freezeRotation = true;
+        Rigidbody.collisionDetectionMode = CollisionDetectionMode.Continuous;
 
         Cursor.lockState = CursorLockMode.Locked;
     }
@@ -35,8 +35,8 @@ public class PlayerMover : Mover
 
     public override void StopMovement()
     {
-        if (_rigidbody != null)
-            _rigidbody.velocity = Vector3.zero;
+        if (Rigidbody != null)
+            Rigidbody.velocity = Vector3.zero;
     }
 
     public override void ResumeMovement() { }

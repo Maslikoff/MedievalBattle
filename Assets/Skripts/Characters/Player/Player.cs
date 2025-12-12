@@ -13,14 +13,11 @@ public class Player : MonoBehaviour
     private PlayerMover _mover;
     private PlayerAttacker _attacker;
     private PlayerAnimation _anim;
-    private PlayerSound _sound;
     private Health _health;
 
     private bool _isAlive = true;
 
     public bool IsAlive => _isAlive;
-    public int CurrentHealth => _health != null ? _health.CurrentHealth : 0;
-    public WeaponType CurrentWeapon => _attacker != null ? _attacker.CurrentWeapon : WeaponType.Firearm;
 
     public event Action PlayerDeath;
     public event Action<int> HealthChanged;
@@ -32,26 +29,56 @@ public class Player : MonoBehaviour
         _mover = GetComponent<PlayerMover>();
         _attacker = GetComponent<PlayerAttacker>();
         _anim = GetComponent<PlayerAnimation>();
-        _sound = GetComponent<PlayerSound>();
         _health = GetComponent<Health>();
     }
 
     private void Start()
     {
         _health.Death += OnHandleDeath;
-        _health.HealthChanged += OnHandleHealthChanged;
-        _attacker.OnWeaponSwitched += OnHandleWeaponSwitched;
+        _health.Changed += OnHandleHealthChanged;
+        _attacker.WeaponSwitched += OnHandleWeaponSwitched;
 
         ConnectInputHandler();
     }
 
+    private void OnDestroy()
+    {
+        if (_inputHandler != null)
+        {
+            _inputHandler.MoveInput -= OnMoveInput;
+            _inputHandler.MouseLookInput -= _mover.Look;
+            _inputHandler.PrimaryAttack -= _attacker.Attack;
+            _inputHandler.WeaponSwitch -= _attacker.OnWeaponSwitch;
+        }
+
+        if (_health != null)
+        {
+            _health.Death -= OnHandleDeath;
+            _health.Changed -= OnHandleHealthChanged;
+        }
+
+        if (_attacker != null)
+        {
+            _attacker.WeaponSwitched -= OnHandleWeaponSwitched;
+        }
+    }
+
     private void ConnectInputHandler()
     {
-        _inputHandler.MoveInput += _mover.Move;
+        _inputHandler.MoveInput += OnMoveInput;
         _inputHandler.MouseLookInput += _mover.Look;
 
         _inputHandler.PrimaryAttack += _attacker.Attack;
         _inputHandler.WeaponSwitch += _attacker.OnWeaponSwitch; 
+    }
+
+    private void OnMoveInput(Vector2 input)
+    {
+        if (_isAlive == false) 
+            return;
+
+        _mover.Move(input);
+        _anim.SetMovementSpeed(input.magnitude);
     }
 
     private void OnHandleDeath()
@@ -73,28 +100,7 @@ public class Player : MonoBehaviour
 
     private void OnHandleWeaponSwitched(WeaponType type)
     {
+        _anim.SetWeaponType(type);
         WeaponSwitched?.Invoke(type);
-    }
-
-    private void OnDestroy()
-    {
-        if (_inputHandler != null)
-        {
-            _inputHandler.MoveInput -= _mover.Move;
-            _inputHandler.MouseLookInput -= _mover.Look;
-            _inputHandler.PrimaryAttack -= _attacker.Attack;
-            _inputHandler.WeaponSwitch -= _attacker.OnWeaponSwitch;
-        }
-
-        if (_health != null)
-        {
-            _health.Death -= OnHandleDeath;
-            _health.HealthChanged -= OnHandleHealthChanged;
-        }
-
-        if (_attacker != null)
-        {
-            _attacker.OnWeaponSwitched -= OnHandleWeaponSwitched;
-        }
     }
 }

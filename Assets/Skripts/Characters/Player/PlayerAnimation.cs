@@ -15,26 +15,22 @@ public class PlayerAnimation : MonoBehaviour
 
     [Header("Dependencies")]
     [SerializeField] private Animator _animator;
-    [SerializeField] private InputHandler _inputHandler;
 
-    private Vector3 _lastInput;
-    private float _currentSpeed;
+    private Coroutine _resetBoolCoroutine;
 
-    private void Start()
+    public void SetMovementSpeed(float speed)
     {
-        _inputHandler.MoveInput += OnMoveInput;
+        _animator.SetFloat(_moveSpeedParam, speed);
     }
 
     public void PlayShootAnimation()
     {
-        _animator.SetBool(_isShootingParam, true);
-        StartCoroutine(ResetBoolNextFrame(_isShootingParam));
+        SetTriggerAnimation(_isShootingParam);
     }
 
     public void PlayMeleeAttackAnimation()
     {
-        _animator.SetBool(_isMeleeAttackingParam, true);
-        StartCoroutine(ResetBoolNextFrame(_isMeleeAttackingParam));
+        SetTriggerAnimation(_isMeleeAttackingParam);
     }
 
     public void PlayDeathAnimation()
@@ -44,28 +40,46 @@ public class PlayerAnimation : MonoBehaviour
 
     public void SetWeaponType(WeaponType weaponType)
     {
-        int weaponTypeInt = (int)weaponType;
-        _animator.SetInteger(_weaponTypeParam, weaponTypeInt);
+        _animator.SetInteger(_weaponTypeParam, (int)weaponType);
     }
 
-    private void OnMoveInput(Vector2 input)
+    public void ResetAllAnimations()
     {
-        _lastInput = input;
-        _currentSpeed = _lastInput.magnitude;
-
-        _animator.SetFloat(_moveSpeedParam, _currentSpeed);
+        _animator.SetBool(_isDeadParam, false);
+        _animator.SetBool(_isShootingParam, false);
+        _animator.SetBool(_isMeleeAttackingParam, false);
+        _animator.SetFloat(_moveSpeedParam, 0f);
     }
 
-    private IEnumerator ResetBoolNextFrame(string paramName)
+    private void SetTriggerAnimation(string paramName)
+    {
+        if (_resetBoolCoroutine != null)
+        {
+            StopCoroutine(_resetBoolCoroutine);
+        }
+
+        _animator.SetBool(paramName, true);
+        _resetBoolCoroutine = StartCoroutine(ResetBoolCoroutine(paramName));
+    }
+
+    private IEnumerator ResetBoolCoroutine(string paramName)
     {
         yield return null;
-
         _animator.SetBool(paramName, false);
+        _resetBoolCoroutine = null;
     }
 
-    private void OnDestroy()
+    private void OnEnable()
     {
-        if (_inputHandler != null)
-            _inputHandler.MoveInput -= OnMoveInput;
+        ResetAllAnimations();
+    }
+
+    private void OnDisable()
+    {
+        if (_resetBoolCoroutine != null)
+        {
+            StopCoroutine(_resetBoolCoroutine);
+            _resetBoolCoroutine = null;
+        }
     }
 }

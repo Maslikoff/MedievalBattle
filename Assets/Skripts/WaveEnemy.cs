@@ -15,7 +15,6 @@ public class WaveEnemy : MonoBehaviour
     [SerializeField] private int[] _enemiesPerWave = new int[] { 3, 5, 7, 10, 15, 20 };
     [SerializeField] private Transform[] _spawnPoints;
     [SerializeField] private EnemySpawner _enemySpawner;
-    [SerializeField] private ParticleSystem _smokeEffect;
 
     [Header("UI")]
     [SerializeField] private WaveView _view;
@@ -46,7 +45,7 @@ public class WaveEnemy : MonoBehaviour
     {
         if (_currentWave >= _totalWaves)
         {
-            AllWavesCompleted();
+            OnAllWavesCompleted();
             return;
         }
 
@@ -119,7 +118,6 @@ public class WaveEnemy : MonoBehaviour
         }
 
         _waveInProgress = false;
-        _enemySpawner.StopSpawning();
     }
 
     private void InitializeWaveManager()
@@ -180,12 +178,6 @@ public class WaveEnemy : MonoBehaviour
             return;
 
         Transform spawnPoint = _spawnPoints[Random.Range(0, _spawnPoints.Length)];
-       
-        if (_smokeEffect != null)
-        {
-            _smokeEffect.transform.position = spawnPoint.position;
-            _smokeEffect.Play();
-        }
 
         StartCoroutine(SpawnAfterSmoke(spawnPoint.position, isBoss));
     }
@@ -198,9 +190,6 @@ public class WaveEnemy : MonoBehaviour
             _enemySpawner.SpawnBoss();
         else
             _enemySpawner.SpawnEnemy();
-
-        if (_smokeEffect != null)
-            _smokeEffect.Stop();
     }
 
     private IEnumerator StartNextWaveAfterDelay()

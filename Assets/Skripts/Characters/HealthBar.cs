@@ -14,12 +14,12 @@ public class HealthBar : MonoBehaviour
 
     private void Start()
     {
-        _health.HealthChanged += OnHealthChanged;
+        _health.Changed += OnHealthChanged;
         _health.Death += OnDeath;
 
-        _healthSlider.maxValue = _health.MaxHealth;
-        _healthSlider.value = _health.CurrentHealth;
-        _targetValue = _health.CurrentHealth;
+        _healthSlider.maxValue = _health.MaxCount;
+        _healthSlider.value = _health.CurrentCount;
+        _targetValue = _health.CurrentCount;
 
         UpdateHealthColor();
     }
@@ -63,7 +63,7 @@ public class HealthBar : MonoBehaviour
     {
         if (_health != null)
         {
-            _health.HealthChanged -= OnHealthChanged;
+            _health.Changed -= OnHealthChanged;
             _health.Death -= OnDeath;
         }
     }

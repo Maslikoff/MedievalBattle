@@ -3,59 +3,57 @@ using UnityEngine;
 
 public class Health : MonoBehaviour
 {
-    [SerializeField] private int _maxHealth = 100;
+    [SerializeField] private int _maxCount = 100;
     [SerializeField] private bool _isInvulnerable = false;
 
-    private int _currentHealth;
+    private int _currentCount;
 
-    public int MaxHealth => _maxHealth;
-    public int CurrentHealth => _currentHealth;
+    public int MaxCount => _maxCount;
+    public int CurrentCount => _currentCount;
 
     public event Action Death;
-    public event Action<int> HealthChanged;
+    public event Action<int> Changed;
     public event Action<int> DamageTaken;
 
     private void Start()
     {
-        _currentHealth = _maxHealth;
+        _currentCount = _maxCount;
 
-        HealthChanged?.Invoke(_currentHealth);
+        Changed?.Invoke(_currentCount);
     }
-
-    public int GetCurrentHealth() => _currentHealth;
 
     public void TakeDamage(int damage)
     {
-        if (_isInvulnerable || _currentHealth <= 0)
+        if (_isInvulnerable || _currentCount <= 0)
             return;
 
-        _currentHealth -= damage;
+        _currentCount -= damage;
 
-        HealthChanged?.Invoke(_currentHealth);
+        Changed?.Invoke(_currentCount);
         DamageTaken?.Invoke(damage);
 
-        if (_currentHealth <= 0)
+        if (_currentCount <= 0)
             Die();
     }
 
     public void SetMaxHealth(int newMaxHealth)
     {
-        _maxHealth = newMaxHealth;
+        _maxCount = newMaxHealth;
 
-        if (_currentHealth > _maxHealth)
-            _currentHealth = _maxHealth;
+        if (_currentCount > _maxCount)
+            _currentCount = _maxCount;
 
-        HealthChanged?.Invoke(_currentHealth);
+        Changed?.Invoke(_currentCount);
     }
 
     public void Heal(int healAmount)
     {
-        _currentHealth += healAmount;
+        _currentCount += healAmount;
 
-        if (_currentHealth > _maxHealth)
-            _currentHealth = _maxHealth;
+        if (_currentCount > _maxCount)
+            _currentCount = _maxCount;
 
-        HealthChanged?.Invoke(_currentHealth);
+        Changed?.Invoke(_currentCount);
     }
 
     private void Die()

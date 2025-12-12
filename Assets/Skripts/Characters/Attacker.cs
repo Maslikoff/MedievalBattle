@@ -2,34 +2,34 @@ using UnityEngine;
 
 public abstract class Attacker : MonoBehaviour
 {
-    [SerializeField] protected int _damage = 20;
-    [SerializeField] protected float _attackRange = 2f;
-    [SerializeField] protected float _attackCooldown = 1f;
+    [SerializeField] protected int Damage = 20;
+    [SerializeField] protected float AttackRange = 2f;
+    [SerializeField] protected float AttackCooldown = 1f;
 
-    protected float _lastAttackTime;
+    protected float LastAttackTime;
 
-    protected bool _canAttack = true;
+    protected bool IsAttack = true;
 
     public abstract void Attack();
     public abstract bool CanAttack();
 
-    protected bool IsCooldownReady() => Time.time >= _lastAttackTime + _attackCooldown;
+    protected bool IsCooldownReady() => Time.time >= LastAttackTime + AttackCooldown;
 
     protected bool IsTargetInRange(Transform target)
     {
         if (target == null)
             return false;
 
-        return Vector3.Distance(transform.position, target.position) <= _attackRange;
+        float distanceSqr = (transform.position - target.position).sqrMagnitude;
+
+        return distanceSqr <= AttackRange * AttackRange;
     }
 
     protected void ApplyDamageToTarget(Transform target)
     {
-        Health targetHealth = target.GetComponent<Health>();
-
-        if (targetHealth != null)
+        if (target.TryGetComponent<Health>(out var hp))
         {
-            targetHealth.TakeDamage(_damage);
+            hp.TakeDamage(Damage);
             OnSuccessfulAttack(target);
         }
     }
@@ -38,18 +38,18 @@ public abstract class Attacker : MonoBehaviour
 
     public void SetCanAttack(bool state)
     {
-        _canAttack = state;
+        IsAttack = state;
     }
 
     public virtual void IncreaseDamage(float multiplier) 
     {
-        _damage = Mathf.RoundToInt(_damage * multiplier);
+        Damage = Mathf.RoundToInt(Damage * multiplier);
     }
 
     public float GetCooldownProgress()
     {
-        float timeSinceLastAttack = Time.time - _lastAttackTime;
+        float timeSinceLastAttack = Time.time - LastAttackTime;
 
-        return Mathf.Clamp01(timeSinceLastAttack / _attackCooldown);
+        return Mathf.Clamp01(timeSinceLastAttack / AttackCooldown);
     }
 }

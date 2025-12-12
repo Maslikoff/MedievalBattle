@@ -21,8 +21,8 @@ public class AmmoView : MonoBehaviour
 
     private void Start()
     {
-        _playerAttacker.OnAmmoChanged += OnAmmoChanged;
-        _playerAttacker.OnWeaponSwitched += OnWeaponSwitched;
+        _playerAttacker.AmmoChanged += OnAmmoChanged;
+        _playerAttacker.WeaponSwitched += OnWeaponSwitched;
 
         UpdateAmmoDisplay(_playerAttacker.CurrentAmmo, _playerAttacker.MaxAmmo);
         UpdateWeaponVisibility();
@@ -75,8 +75,8 @@ public class AmmoView : MonoBehaviour
     {
         if (_playerAttacker != null)
         {
-            _playerAttacker.OnAmmoChanged -= OnAmmoChanged;
-            _playerAttacker.OnWeaponSwitched -= OnWeaponSwitched;
+            _playerAttacker.AmmoChanged -= OnAmmoChanged;
+            _playerAttacker.WeaponSwitched -= OnWeaponSwitched;
         }
     }
 }

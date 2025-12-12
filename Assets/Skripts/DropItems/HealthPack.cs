@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class HealthPack : MonoBehaviour
@@ -6,13 +7,16 @@ public class HealthPack : MonoBehaviour
     [SerializeField] private float _rotationSpeed = 50f;
     [SerializeField] private float _amplitude = 0.5f;
     [SerializeField] private float _frequency = 1f;
+    [SerializeField] private AudioClip _pickupSound;
 
+    private AudioSource _audioSource;
     private Vector3 _startPosition;
 
-    public int HealAmount => healAmount;
+    public event Action HealthPackTaken;
 
     private void Start()
     {
+        _audioSource = GetComponent<AudioSource>();
         _startPosition = transform.position;
     }
 
@@ -28,13 +32,17 @@ public class HealthPack : MonoBehaviour
     {
         Health player = other.GetComponent<Health>();
 
-        if (player != null)
+        if (player != null && player.CurrentCount < player.MaxCount)
         {
-            if (player.CurrentHealth < player.MaxHealth)
-            {
-                player.Heal(healAmount);
-                gameObject.SetActive(false);
-            }
+            _audioSource.PlayOneShot(_pickupSound);
+            player.Heal(healAmount);
+            OnHealthPackTaken();
         }
+    }
+
+    private void OnHealthPackTaken()
+    {
+        HealthPackTaken?.Invoke();
+        gameObject.SetActive(false);
     }
 }

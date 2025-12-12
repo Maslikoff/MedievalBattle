@@ -2215,7 +2215,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c6459c5e59be5145ae741d12a81e6f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _moveSpeed: 5
+  _moveSpeed: 2
   _mouseSensitivity: 2
   _stoppingDistance: 1
 --- !u!114 &4089924051812944306
@@ -2280,7 +2280,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _scoreValue: 100
-  _normalMaxHealth: 100
+  _normalMaxHealth: 90
 --- !u!82 &1904217372083054380
 AudioSource:
   m_ObjectHideFlags: 0

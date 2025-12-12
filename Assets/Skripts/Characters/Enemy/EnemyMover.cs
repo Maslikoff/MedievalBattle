@@ -18,7 +18,7 @@ public class EnemyMover : Mover
 
         if (_navMeshAgent != null)
         {
-            _navMeshAgent.speed = _moveSpeed;
+            _navMeshAgent.speed = MoveSpeed;
             _navMeshAgent.stoppingDistance = _stoppingDistance;
             _navMeshAgent.acceleration = 8f;
             _navMeshAgent.angularSpeed = 120f;

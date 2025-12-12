@@ -30,7 +30,7 @@ public class EnemyAttacker : Attacker
             return;
 
         PerformMeleeAttack();
-        _lastAttackTime = Time.time;
+        LastAttackTime = Time.time;
 
         _enemy?.PlayAttackAnimation();
     }
@@ -40,7 +40,7 @@ public class EnemyAttacker : Attacker
         _baseDamage = Mathf.RoundToInt(_baseDamage * multiplier);
     }
 
-    public override bool CanAttack() => _canAttack && IsCooldownReady() && _playerTarget != null;
+    public override bool CanAttack() => IsAttack && IsCooldownReady() && _playerTarget != null;
 
     private void PerformMeleeAttack()
     {

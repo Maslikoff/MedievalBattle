@@ -1,4 +1,6 @@
+using Newtonsoft.Json.Utilities;
 using System;
+using System.Collections;
 using UnityEngine;
 
 public enum WeaponType
@@ -7,6 +9,7 @@ public enum WeaponType
     Melee
 }
 
+[RequireComponent(typeof(AimHelper))]
 public class PlayerAttacker : Attacker
 {
     private const float Diference = 1.5f;
@@ -14,11 +17,13 @@ public class PlayerAttacker : Attacker
     private const float Balance = 100f;
     private const float MiddleScreen = 2f;
     private const float AnimationDelay = 1f;
+    private const int MaxHitColliders = 10;
 
     [Header("Attack Settings")]
     [SerializeField] private Transform _firePoint;
     [SerializeField] private float _bulletSpeed = 20f;
     [SerializeField] private LayerMask _enemyLayerMask;
+    [SerializeField] private LayerMask _bulletIgnoreLayerMask;
 
     [Header("Ammo Settings")]
     [SerializeField] private int _maxAmmo = 120;
@@ -31,16 +36,20 @@ public class PlayerAttacker : Attacker
     [Header("Dependencies")]
     [SerializeField] private BulletPool _bulletPool;
 
+    private AimHelper _aimHelper;
     private Player _player;
     private PlayerAnimation _playerAnimation;
     private PlayerSound _playerSound;
     private Camera _playerCamera;
     private WeaponType _currentWeapon = WeaponType.Firearm;
 
+    private Collider[] _hitColliders;
+    private Coroutine _meleeAttackCoroutine;
+
     private bool _isAttacking;
 
-    public event Action<WeaponType> OnWeaponSwitched;
-    public event Action<int> OnAmmoChanged;
+    public event Action<WeaponType> WeaponSwitched;
+    public event Action<int> AmmoChanged;
 
     public WeaponType CurrentWeapon => _currentWeapon;
     public int CurrentAmmo => _currentAmmo;
@@ -52,6 +61,8 @@ public class PlayerAttacker : Attacker
         _playerAnimation = GetComponent<PlayerAnimation>();
         _playerSound = GetComponent<PlayerSound>();
         _playerCamera = Camera.main;
+
+        _hitColliders = new Collider[MaxHitColliders];
 
         UpdateWeaponVisuals();
     }
@@ -74,7 +85,7 @@ public class PlayerAttacker : Attacker
                 break;
         }
 
-        _lastAttackTime = Time.time;
+        LastAttackTime = Time.time;
         _isAttacking = false;
     }
 
@@ -87,10 +98,10 @@ public class PlayerAttacker : Attacker
     public void AddAmmo(int amount)
     {
         _currentAmmo = Mathf.Clamp(_currentAmmo + amount, 0, _maxAmmo);
-        OnAmmoChanged?.Invoke(_currentAmmo);
+        AmmoChanged?.Invoke(_currentAmmo);
     }
 
-    public override bool CanAttack() => _canAttack && IsCooldownReady();
+    public override bool CanAttack() => IsAttack && IsCooldownReady();
 
     private bool CanPerformActions() => _player != null && _player.IsAlive;
 
@@ -107,43 +118,56 @@ public class PlayerAttacker : Attacker
         }
 
         _currentAmmo--;
-        OnAmmoChanged?.Invoke(_currentAmmo);
+        AmmoChanged?.Invoke(_currentAmmo);
 
         _playerAnimation.PlayShootAnimation();
 
         _playerSound?.PlayShootSound();
 
-        Vector3 targetPoint = GetCenterScreenPoint();
-        Vector3 shootDirection = (targetPoint - GetShootPosition()).normalized;
+        Vector3 shootDirection = _aimHelper.GetAimDirection(_firePoint.position, _enemyLayerMask);
 
         Bullet bullet = _bulletPool.GetBullet(GetShootPosition(), Quaternion.LookRotation(shootDirection));
         bullet.Owner = gameObject;
         bullet.SetSpeed(_bulletSpeed);
 
-        Collider playerCollider = GetComponent<Collider>();
-
-        if (playerCollider != null)
-            bullet.IgnoreCollision(playerCollider);
+        bullet.SetIgnoreLayerMask(_bulletIgnoreLayerMask);
     }
 
     private void PerformMeleeAttack()
     {
         _playerAnimation.PlayMeleeAttackAnimation();
         _playerSound?.PlayMeleeSound();
-        Invoke(nameof(ApplyMeleeDamage), AnimationDelay);
+
+        if (_meleeAttackCoroutine != null)
+            StopCoroutine(_meleeAttackCoroutine);
+
+        _meleeAttackCoroutine = StartCoroutine(MeleeAttackRoutine());
+    }
+
+    private IEnumerator MeleeAttackRoutine()
+    {
+        yield return new WaitForSeconds(AnimationDelay);
+
+        ApplyMeleeDamage();
+
+        _isAttacking = false;
+        _meleeAttackCoroutine = null;
     }
 
     private void ApplyMeleeDamage()
     {
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, _attackRange, _enemyLayerMask);
+        int numColliders = Physics.OverlapSphereNonAlloc(transform.position, AttackRange, _hitColliders, _enemyLayerMask);
 
-        foreach (Collider collider in hitColliders)
+        for (int i = 0; i < numColliders; i++)
         {
-            Vector3 directionToEnemy = (collider.transform.position - transform.position).normalized;
-            float dotProduct = Vector3.Dot(transform.forward, directionToEnemy);
+            if (_hitColliders[i] != null)
+            {
+                Vector3 directionToEnemy = (_hitColliders[i].transform.position - transform.position).normalized;
+                float dotProduct = Vector3.Dot(transform.forward, directionToEnemy);
 
-            if (dotProduct > 0)
-                ApplyDamageToTarget(collider.transform);
+                if (dotProduct > 0)
+                    ApplyDamageToTarget(_hitColliders[i].transform);
+            }
         }
     }
 
@@ -156,20 +180,6 @@ public class PlayerAttacker : Attacker
             _meleeWeaponModel.gameObject.SetActive(_currentWeapon == WeaponType.Melee);
     }
 
-    private Vector3 GetCenterScreenPoint()
-    {
-        if (_playerCamera == null)
-            return transform.position + transform.forward * Balance;
-
-        Ray ray = _playerCamera.ScreenPointToRay(new Vector3(Screen.width / MiddleScreen, Screen.height / MiddleScreen, 0f));
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit, MaxDistance, _enemyLayerMask))
-            return hit.point;
-
-        return ray.origin + ray.direction * Balance;
-    }
-
     private Vector3 GetShootPosition()
     {
         if (_firePoint != null)
@@ -179,5 +189,14 @@ public class PlayerAttacker : Attacker
             return _playerCamera.transform.position;
 
         return transform.position + Vector3.up * Diference;
+    }
+
+    private void OnDisable()
+    {
+        if (_meleeAttackCoroutine != null)
+        {
+            StopCoroutine(_meleeAttackCoroutine);
+            _meleeAttackCoroutine = null;
+        }
     }
 }

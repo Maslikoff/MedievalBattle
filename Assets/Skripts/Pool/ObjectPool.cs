@@ -3,32 +3,32 @@ using UnityEngine;
 
 public abstract class ObjectPool<T> : MonoBehaviour where T : Component
 {
-    [SerializeField] protected T _prefab;
-    [SerializeField] protected int _initialPoolSize = 10;
+    [SerializeField] protected T Prefab;
+    [SerializeField] protected int InitialPoolSize = 10;
 
-    protected Queue<T> _pool = new Queue<T>();
-    protected Transform _poolParent;
+    protected Queue<T> Pool = new Queue<T>();
+    protected Transform PoolParent;
+
+    private bool _isInitialized = false;
 
     protected virtual void Awake()
     {
-        _poolParent = new GameObject($"{typeof(T).Name}Pool").transform;
-        _poolParent.SetParent(transform);
-
-        InitializePool();
+        PoolParent = new GameObject($"{typeof(T).Name}Pool").transform;
+        PoolParent.SetParent(transform);
     }
 
-    protected void InitializePool()
+    protected virtual void Start()
     {
-        for (int i = 0; i < _initialPoolSize; i++)
+        if (_isInitialized == false)
         {
-            T obj = CreateNewObject();
-            ReturnToPool(obj);
+            InitializePool();
+            _isInitialized = true;
         }
     }
 
     protected virtual T CreateNewObject()
     {
-        T obj = Instantiate(_prefab, _poolParent);
+        T obj = Instantiate(Prefab, PoolParent);
         obj.gameObject.SetActive(false);
 
         PoolableObject poolable = obj.gameObject.AddComponent<PoolableObject>();
@@ -40,14 +40,21 @@ public abstract class ObjectPool<T> : MonoBehaviour where T : Component
     protected virtual void OnObjectGet(T obj) { }
     protected virtual void OnObjectReturn(T obj) { }
 
-    public int GetPoolSize() => _pool.Count;
+    protected void InitializePool()
+    {
+        for (int i = 0; i < InitialPoolSize; i++)
+        {
+            T obj = CreateNewObject();
+            ReturnToPool(obj);
+        }
+    }
 
     public virtual T GetFromPool()
     {
         T obj;
 
-        if (_pool.Count > 0)
-            obj = _pool.Dequeue();
+        if (Pool.Count > 0)
+            obj = Pool.Dequeue();
         else
             obj = CreateNewObject();
 
@@ -60,7 +67,9 @@ public abstract class ObjectPool<T> : MonoBehaviour where T : Component
     public virtual void ReturnToPool(T obj)
     {
         obj.gameObject.SetActive(false);
-        _pool.Enqueue(obj);
+        Pool.Enqueue(obj);
         OnObjectReturn(obj);
     }
+
+    public int GetPoolSize() => Pool.Count;
 }

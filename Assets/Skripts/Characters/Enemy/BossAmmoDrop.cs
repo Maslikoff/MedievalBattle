@@ -44,7 +44,7 @@ public class BossAmmoDrop : MonoBehaviour
         float radius = 1.5f;
 
         Vector3 bossPosition = transform.position;
-        Vector3 horizontalOffset = new Vector3(Mathf.Cos(angle) * radius, 0f, Mathf.Sin(angle) * radius);
+        Vector3 horizontalOffset = new Vector3(Mathf.Cos(angle) * radius, 1f, Mathf.Sin(angle) * radius);
 
         return bossPosition + horizontalOffset + Vector3.up;
     }

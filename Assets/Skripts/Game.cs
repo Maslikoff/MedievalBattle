@@ -2,6 +2,8 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
 using UnityEngine;
+using YG;
+using System.Collections;
 
 public class Game : MonoBehaviour
 {
@@ -17,15 +19,20 @@ public class Game : MonoBehaviour
     [SerializeField] private GameObject _pausePanel;
     [SerializeField] private GameObject _victoryPanel;
     [SerializeField] private GameObject _defeatPanel;
+    [SerializeField] private GameObject _helpPanel;
 
     [Header("Victory Panel")]
-    [SerializeField] private Button _victoryMenuButton;
     [SerializeField] private Button _victoryRestartButton;
 
     [Header("Defeat Panel")]
     [SerializeField] private TextMeshProUGUI _defeatWaveText;
     [SerializeField] private Button _defeatRestartButton;
     [SerializeField] private string _defeatFormat = "You survived {0} waves";
+
+    [Header("Help Panel Settings")]
+    [SerializeField] private float _helpPanelDuration = 5f;
+
+    private Coroutine _helpPanelCoroutine;
 
     private bool _gameEnded = false;
     private bool _isPaused = false;
@@ -36,25 +43,29 @@ public class Game : MonoBehaviour
 
         SetPanelState(_victoryPanel, false);
         SetPanelState(_defeatPanel, false);
+        SetPanelState(_pausePanel, false);
         SetPanelState(_gamePanel, true);
+        SetPanelState(_helpPanel, true);
 
         SetupButtons();
+
+        StartHelpPanelTimer();
     }
 
     public void RestartGame()
     {
         Time.timeScale = 1f;
-
+        YG2.InterstitialAdvShow();
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 
-    public void LoadMenu()
+    private void StartHelpPanelTimer()
     {
-        Time.timeScale = 1f;
+        if (_helpPanelCoroutine != null)
+            StopCoroutine(_helpPanelCoroutine);
 
-        SceneManager.LoadScene(0);
+        _helpPanelCoroutine = StartCoroutine(HideHelpPanelAfterDelay());
     }
-
 
     private void SubscribeToEvents()
     {
@@ -65,7 +76,6 @@ public class Game : MonoBehaviour
 
     private void SetupButtons()
     {
-        _victoryMenuButton.onClick.AddListener(LoadMenu);
         _victoryRestartButton.onClick.AddListener(RestartGame);
         _defeatRestartButton.onClick.AddListener(RestartGame);
     }
@@ -76,6 +86,13 @@ public class Game : MonoBehaviour
             return;
 
         _gameEnded = true;
+
+        if (_helpPanelCoroutine != null)
+        {
+            StopCoroutine(_helpPanelCoroutine);
+            _helpPanelCoroutine = null;
+        }
+
         ShowDefeatPanel();
     }
 
@@ -85,6 +102,13 @@ public class Game : MonoBehaviour
             return;
 
         _gameEnded = true;
+
+        if (_helpPanelCoroutine != null)
+        {
+            StopCoroutine(_helpPanelCoroutine);
+            _helpPanelCoroutine = null;
+        }
+
         ShowVictoryPanel();
     }
 
@@ -100,7 +124,8 @@ public class Game : MonoBehaviour
 
         if (_isPaused)
         {
-            SetPanelState(_gamePanel, false);
+            //SetPanelState(_gamePanel, false);
+            SetPanelState(_helpPanel, true);
             SetPanelState(_pausePanel, true);
 
             Time.timeScale = 0f;
@@ -109,7 +134,8 @@ public class Game : MonoBehaviour
         else
         {
             SetPanelState(_pausePanel, false);
-            SetPanelState(_gamePanel, true);
+            SetPanelState(_helpPanel, false);
+            //SetPanelState(_gamePanel, true);
 
             Time.timeScale = 1f;
             Cursor.lockState = CursorLockMode.Locked;
@@ -119,6 +145,7 @@ public class Game : MonoBehaviour
     private void ShowVictoryPanel()
     {
         SetPanelState(_gamePanel, false);
+        SetPanelState(_helpPanel, false);
         SetPanelState(_victoryPanel, true);
 
         Time.timeScale = 0f;
@@ -128,6 +155,7 @@ public class Game : MonoBehaviour
     private void ShowDefeatPanel()
     {
         SetPanelState(_gamePanel, false);
+        SetPanelState(_helpPanel, false);
         SetPanelState(_defeatPanel, true);
 
         if (_defeatWaveText != null && _waveManager != null)
@@ -146,6 +174,13 @@ public class Game : MonoBehaviour
             panel.SetActive(state);
     }
 
+    private IEnumerator HideHelpPanelAfterDelay()
+    {
+        yield return new WaitForSeconds(_helpPanelDuration);
+
+        SetPanelState(_helpPanel, false);
+    }
+
     private void OnDestroy()
     {
         if (_playerHealth != null)
@@ -154,13 +189,16 @@ public class Game : MonoBehaviour
         if (_waveManager != null)
             _waveManager.AllWavesCompleted -= OnAllWavesCompleted;
 
-        if (_victoryMenuButton != null)
-            _victoryMenuButton.onClick.RemoveAllListeners();
-
         if (_victoryRestartButton != null)
             _victoryRestartButton.onClick.RemoveAllListeners();
 
         if (_defeatRestartButton != null)
             _defeatRestartButton.onClick.RemoveAllListeners();
+
+        if (_helpPanelCoroutine != null)
+        {
+            StopCoroutine(_helpPanelCoroutine);
+            _helpPanelCoroutine = null;
+        }
     }
 }

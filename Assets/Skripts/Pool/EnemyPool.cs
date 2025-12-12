@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
@@ -6,7 +7,7 @@ using UnityEngine.AI;
 public class EnemyPool : ObjectPool<Enemy>
 {
     [SerializeField] private bool _isBossPool = false;
-    [SerializeField] private Transform _playerTraget;
+    [SerializeField] private Transform _playerTarget;
     [SerializeField] private AmmoDropPool _ammoPool;
 
     private List<Enemy> _activeEnemies = new List<Enemy>();
@@ -24,25 +25,43 @@ public class EnemyPool : ObjectPool<Enemy>
 
     protected override void OnObjectGet(Enemy enemy)
     {
-        enemy.Initialize(_playerTraget);
+        if (enemy != null)
+        {
+            enemy.Initialize(_playerTarget);
+            _activeEnemies.Add(enemy);
+            enemy.EnemyDeath += OnEnemyDeath;
+        }
     }
 
-    public override Enemy GetFromPool()
+    protected override void OnObjectReturn(Enemy enemy)
     {
-        Enemy enemy = base.GetFromPool();
-        _activeEnemies.Add(enemy);
+        base.OnObjectReturn(enemy);
 
-        enemy.EnemyDeath += OnEnemyDeath;
+        if (enemy != null)
+        {
+            enemy.EnemyDeath -= OnEnemyDeath;
+            enemy.ResetEnemy();
 
-        return enemy;
+            NavMeshAgent navMeshAgent = enemy.GetComponent<NavMeshAgent>();
+
+            if (navMeshAgent != null && navMeshAgent.isActiveAndEnabled && navMeshAgent.isOnNavMesh)
+            {
+                navMeshAgent.ResetPath();
+                navMeshAgent.velocity = Vector3.zero;
+            }
+        }
+
+        _activeEnemies.Remove(enemy);
     }
+
+    public override Enemy GetFromPool() => base.GetFromPool();
 
     public override void ReturnToPool(Enemy enemy)
     {
-        base.ReturnToPool(enemy);
-        _activeEnemies.Remove(enemy);
+        if (enemy == null)
+            return;
 
-        enemy.EnemyDeath -= OnEnemyDeath;
+        base.ReturnToPool(enemy);
     }
 
     public void OnBossDeathWithAmmo(Vector3 position, int amount)
@@ -55,21 +74,39 @@ public class EnemyPool : ObjectPool<Enemy>
     {
         Enemy enemy = GetFromPool();
 
-        NavMeshAgent navMeshAgent = enemy.GetComponent<NavMeshAgent>();
-        navMeshAgent.enabled = false;
+        if (enemy != null)
+        {
+            NavMeshAgent navMeshAgent = enemy.GetComponent<NavMeshAgent>();
 
-        enemy.transform.position = position;
-        enemy.transform.rotation = Quaternion.identity;
+            if (navMeshAgent != null)
+            {
+                navMeshAgent.enabled = false;
+                enemy.transform.position = position;
+                enemy.transform.rotation = Quaternion.identity;
+                navMeshAgent.enabled = true;
 
-        navMeshAgent.enabled = true;
+                StartCoroutine(ActivateAgentNextFrame(navMeshAgent));
+            }
 
-        enemy.ResumeEnemy();
+            enemy.ResumeEnemy();
+        }
     }
 
     public void ClearAllActiveEnemies()
     {
         foreach (Enemy enemy in _activeEnemies.ToArray())
-            ReturnToPool(enemy);
+            if (enemy != null)
+                ReturnToPool(enemy);
+
+        _activeEnemies.Clear();
+    }
+
+    private IEnumerator ActivateAgentNextFrame(NavMeshAgent agent)
+    {
+        yield return null; 
+
+        if (agent != null && agent.isActiveAndEnabled)
+            agent.isStopped = false;
     }
 
     private void OnEnemyDeath(Enemy enemy)

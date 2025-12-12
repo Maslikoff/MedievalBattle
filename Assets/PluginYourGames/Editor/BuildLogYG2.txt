@@ -1,0 +1,3 @@
+﻿Build path: D:/GameBilds/MedievalBattle
+Build number: 6
+PluginYG version: 2.007

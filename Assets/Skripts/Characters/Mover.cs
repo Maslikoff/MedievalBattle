@@ -3,17 +3,17 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public abstract class Mover : MonoBehaviour
 {
-    [SerializeField] protected float _moveSpeed = 5f;
-    [SerializeField] protected float _mouseSensitivity = 2f;
+    [SerializeField] protected float MoveSpeed = 5f;
+    [SerializeField] protected float MouseSensitivity = 2f;
 
-    protected Rigidbody _rigidbody;
-    protected Camera _viewCamera;
-    protected float _xRotation = 0f;
+    protected Rigidbody Rigidbody;
+    protected Camera ViewCamera;
+    protected float XRotation = 0f;
 
     protected virtual void Awake()
     {
-        _rigidbody = GetComponent<Rigidbody>();
-        _viewCamera = Camera.main;
+        Rigidbody = GetComponent<Rigidbody>();
+        ViewCamera = Camera.main;
     }
 
     public abstract void Move(Vector2 input);
@@ -29,21 +29,21 @@ public abstract class Mover : MonoBehaviour
 
     protected void ApplyCameraRotation(Vector2 mouseInput)
     {
-        if (_viewCamera == null) return;
+        if (ViewCamera == null) return;
 
-        float mouseX = mouseInput.x * _mouseSensitivity;
-        float mouseY = mouseInput.y * _mouseSensitivity;
+        float mouseX = mouseInput.x * MouseSensitivity;
+        float mouseY = mouseInput.y * MouseSensitivity;
 
-        _xRotation -= mouseY;
-        _xRotation = Mathf.Clamp(_xRotation, -90f, 90f);
+        XRotation -= mouseY;
+        XRotation = Mathf.Clamp(XRotation, -90f, 90f);
 
-        _viewCamera.transform.localRotation = Quaternion.Euler(_xRotation, 0f, 0f);
+        ViewCamera.transform.localRotation = Quaternion.Euler(XRotation, 0f, 0f);
         transform.Rotate(Vector3.up * mouseX);
     }
 
     protected void ApplyMovement(Vector3 worldMove)
     {
-        if (_rigidbody == null) return;
-        _rigidbody.MovePosition(_rigidbody.position + worldMove * _moveSpeed * Time.fixedDeltaTime);
+        if (Rigidbody == null) return;
+        Rigidbody.MovePosition(Rigidbody.position + worldMove * MoveSpeed * Time.fixedDeltaTime);
     }
 }

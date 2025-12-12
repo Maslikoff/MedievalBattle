@@ -13,36 +13,10 @@ public class EnemySpawner : MonoBehaviour
     [Header("Enemy Pools")]
     [SerializeField] private List<EnemyPool> _enemyPools = new List<EnemyPool>();
 
-    private float _spawnTimer;
-    private bool _isSpawning = true;
-
-    private void Start()
-    {
-
-        if (_autoSpawn == false)
-            _isSpawning = false;
-    }
-
     public void ClearAllEnemies()
     {
         foreach (EnemyPool pool in _enemyPools)
             pool.ClearAllActiveEnemies();
-    }
-
-    public void StartSpawning()
-    {
-        _isSpawning = true;
-    }
-
-    public void StopSpawning()
-    {
-        _isSpawning = false;
-    }
-
-    public void AddEnemyPool(EnemyPool pool)
-    {
-        if (_enemyPools.Contains(pool) == false)
-            _enemyPools.Add(pool);
     }
 
     public void SetSpawnPoints(Transform[] spawnPoints)
@@ -52,7 +26,7 @@ public class EnemySpawner : MonoBehaviour
 
     public void SetWaveManager(WaveEnemy waveManager)
     {
-        _waveManager = waveManager;
+        waveManager = _waveManager;
     }
 
     public void SpawnEnemy()
@@ -67,7 +41,7 @@ public class EnemySpawner : MonoBehaviour
 
     public void SpawnBoss()
     {
-        if (_spawnPoints.Length == 0) 
+        if (_spawnPoints.Length == 0)
             return;
 
         EnemyPool bossPool = GetBossPool();
@@ -79,26 +53,15 @@ public class EnemySpawner : MonoBehaviour
         }
     }
 
-    public void SpawnEnemyAtPoint(int spawnPointIndex, string enemyType)
-    {
-        if (spawnPointIndex < 0 || spawnPointIndex >= _spawnPoints.Length) 
-            return;
-
-        EnemyPool targetPool = _enemyPools.Find(pool => pool);
-
-        if (targetPool != null)
-            targetPool.SpawnAtPosition(_spawnPoints[spawnPointIndex].position);
-    }
-
     private EnemyPool GetBossPool()
     {
         EnemyPool bossPool = _enemyPools.Find(_pool => _pool.IsBossPool);
 
-        if(bossPool == null)
+        if (bossPool == null)
         {
             bossPool = GetComponentInChildren<EnemyPool>();
 
-            if(bossPool != null && bossPool.IsBossPool)
+            if (bossPool != null && bossPool.IsBossPool)
                 _enemyPools.Add(bossPool);
         }
 

@@ -2616,7 +2616,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3c6459c5e59be5145ae741d12a81e6f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _moveSpeed: 5
+  _moveSpeed: 2
   _mouseSensitivity: 2
   _stoppingDistance: 1
 --- !u!114 &3338954565184088477
@@ -2698,9 +2698,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5a755cd9f52a0ab4792c80b927899526, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _minAmmoDrop: 5
-  _maxAmmoDrop: 10
-  _dropCount: 4
+  _minAmmoDrop: 15
+  _maxAmmoDrop: 35
+  _dropCount: 5
 --- !u!82 &866198480670202424
 AudioSource:
   m_ObjectHideFlags: 0
