@@ -12,6 +12,7 @@ public abstract class Enemy : MonoBehaviour
 {
     [Header("Base Enemy Settings")]
     [SerializeField] protected int _scoreValue = 100;
+    [SerializeField] protected Renderer _enemyRenderer;
 
     protected EnemyMover _mover;
     protected EnemyAttacker _attacker;
@@ -19,7 +20,6 @@ public abstract class Enemy : MonoBehaviour
     protected EnemySound _sound;
     protected Health _health;
     protected NavMeshAgent _navMeshAgent;
-    protected Renderer _enemyRenderer;
     protected Transform _playerTarget;
     protected Color _originalColor;
 
@@ -40,7 +40,6 @@ public abstract class Enemy : MonoBehaviour
         _attacker = GetComponent<EnemyAttacker>();
         _health = GetComponent<Health>();
         _navMeshAgent = GetComponent<NavMeshAgent>();
-        _enemyRenderer = GetComponentInChildren<Renderer>();
         _enemyAnimator = GetComponent<EnemyAnimator>();
 
         _originalColor = _enemyRenderer.material.color;

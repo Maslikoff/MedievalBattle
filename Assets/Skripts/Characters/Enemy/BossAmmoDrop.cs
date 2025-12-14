@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class BossAmmoDrop : MonoBehaviour
 {
@@ -8,6 +10,10 @@ public class BossAmmoDrop : MonoBehaviour
 
     private Health _health;
     private Enemy _enemy;
+
+    public int AmmoAmount { get; private set; }
+
+    public event Action<Vector3, int> AmmoDrop;
 
     private void Start()
     {
@@ -25,17 +31,10 @@ public class BossAmmoDrop : MonoBehaviour
             {
                 Vector3 spawnPosition = CalculateSpawnPosition(i);
                 int ammoAmount = Random.Range(_minAmmoDrop, _maxAmmoDrop + 1);
-                TriggerAmmoDrop(spawnPosition, ammoAmount);
+
+                AmmoDrop?.Invoke(spawnPosition, ammoAmount);
             }
         }
-    }
-
-    private void TriggerAmmoDrop(Vector3 position, int amount)
-    {
-        EnemyPool enemyPool = GetComponentInParent<EnemyPool>();
-
-        if (enemyPool != null)
-            enemyPool.OnBossDeathWithAmmo(position, amount);
     }
 
     private Vector3 CalculateSpawnPosition(int index)

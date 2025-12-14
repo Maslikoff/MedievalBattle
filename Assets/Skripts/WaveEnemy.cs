@@ -25,9 +25,8 @@ public class WaveEnemy : MonoBehaviour
     private Coroutine _waveCoroutine;
 
     private bool _waveInProgress = false;
-    private bool _waitingForBoss = false;
 
-    public int CurrentWave => _currentWave;
+    public int CurrentWave { get; private set;}
     public int TotalWaves => _totalWaves;
     public bool IsWaveInProgress => _waveInProgress;
 

@@ -7,13 +7,13 @@ using UnityEngine.AI;
 public class EnemyPool : ObjectPool<Enemy>
 {
     [SerializeField] private bool _isBossPool = false;
-    [SerializeField] private Transform _playerTarget;
-    [SerializeField] private AmmoDropPool _ammoPool;
+    [SerializeField] private Transform _playerTarget; 
+    [SerializeField] private HandlingEnemyDeath _deathHandler;
 
     private List<Enemy> _activeEnemies = new List<Enemy>();
 
+    public IEnumerable<object> ActiveEnemies => _activeEnemies;
     public bool IsBossPool => _isBossPool;
-    public int ActiveEnemiesCount => _activeEnemies.Count;
 
     public event Action<Enemy> EnemyDeathFromPool;
     public event Action<Vector3> BossDeath;
@@ -29,7 +29,7 @@ public class EnemyPool : ObjectPool<Enemy>
         {
             enemy.Initialize(_playerTarget);
             _activeEnemies.Add(enemy);
-            enemy.EnemyDeath += OnEnemyDeath;
+            _deathHandler?.RegisterEnemy(enemy);
         }
     }
 
@@ -39,8 +39,9 @@ public class EnemyPool : ObjectPool<Enemy>
 
         if (enemy != null)
         {
-            enemy.EnemyDeath -= OnEnemyDeath;
             enemy.ResetEnemy();
+
+            _deathHandler?.UnregisterEnemy(enemy);
 
             NavMeshAgent navMeshAgent = enemy.GetComponent<NavMeshAgent>();
 
@@ -62,12 +63,6 @@ public class EnemyPool : ObjectPool<Enemy>
             return;
 
         base.ReturnToPool(enemy);
-    }
-
-    public void OnBossDeathWithAmmo(Vector3 position, int amount)
-    {
-        if (_ammoPool != null)
-            _ammoPool.SpawnAmmo(position, amount);
     }
 
     public void SpawnAtPosition(Vector3 position)
@@ -107,14 +102,5 @@ public class EnemyPool : ObjectPool<Enemy>
 
         if (agent != null && agent.isActiveAndEnabled)
             agent.isStopped = false;
-    }
-
-    private void OnEnemyDeath(Enemy enemy)
-    {
-        if (enemy.IsBoss)
-            BossDeath?.Invoke(enemy.transform.position);
-
-        ReturnToPool(enemy);
-        EnemyDeathFromPool?.Invoke(enemy);
     }
 }

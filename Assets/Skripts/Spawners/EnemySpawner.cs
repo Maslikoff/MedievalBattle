@@ -55,17 +55,11 @@ public class EnemySpawner : MonoBehaviour
 
     private EnemyPool GetBossPool()
     {
-        EnemyPool bossPool = _enemyPools.Find(_pool => _pool.IsBossPool);
+        foreach (EnemyPool pool in _enemyPools)
+            if (pool != null && pool.IsBossPool)
+                return pool;
 
-        if (bossPool == null)
-        {
-            bossPool = GetComponentInChildren<EnemyPool>();
-
-            if (bossPool != null && bossPool.IsBossPool)
-                _enemyPools.Add(bossPool);
-        }
-
-        return bossPool;
+        return null;
     }
 
     private EnemyPool GetRandomNormalPool()
